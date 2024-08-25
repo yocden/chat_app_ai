@@ -1,0 +1,6 @@
+1. npm init -y ==> initialize the project to produce JSON file
+2. create an src folder
+3. npm i -D typescript ts-node @types/node ==> install typescript
+4. npm i openai tiktoken ==> install necessary package for the openai functions
+5. tsc --init ==> create the tsconfig file
+
