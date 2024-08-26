@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":  "node -r ts-node/register src/basic_chat/index.ts  "
+    "start":  "node -r ts-node/register src/tools/index.ts  "
   },
   "keywords": [],
   "author": "",
