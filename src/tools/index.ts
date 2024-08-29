@@ -8,19 +8,28 @@ function getTimeOfDay() {
   return "5:45";
 }
 
+function getOrderStatus(orderId: string) {
+  console.log(`Getting the status order ${orderId}`);
+  const orderAsNumber = parseInt(orderId);
+  if (orderAsNumber % 2 == 0) {
+    return "In progress";
+  }
+  return "Completed";
+}
+
 async function callOpenAIWithTools() {
   const context: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     {
       role: "system",
       content:
-        "You are a conversational AI assistant giving information about date and time.",
+        "You are a conversational AI assistant giving information about status order and time.",
     },
     {
       role: "user",
-      content: "What is the current date and time in New York City?",
+      content: "What is the status of order 12345?",
     },
   ];
-  //configure chat tools(call openAI)
+  //configure chat tools(call openAI). in this sample tool is a FUNCTION
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: context,
@@ -30,6 +39,23 @@ async function callOpenAIWithTools() {
         function: {
           name: "getTimeOfDay",
           description: "Get the time of day",
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "getOrderStatus",
+          description: "Return the status of an order",
+          parameters: {
+            type: "object",
+            properties: {
+              orderId: {
+                type: "string",
+                description: "The id of the order to get the status",
+              },
+            },
+            required: ["orderId"],
+          },
         },
       },
     ],
@@ -42,6 +68,19 @@ async function callOpenAIWithTools() {
     const toolName = toolCall.function.name;
     if (toolName === "getTimeOfDay") {
       const toolResponse = getTimeOfDay();
+      // to avoid error
+      context.push(response.choices[0].message);
+      context.push({
+        role: "tool",
+        content: toolResponse,
+        tool_call_id: toolCall.id,
+      });
+    }
+
+    if (toolName === "getOrderStatus") {
+      const rawArgument = JSON.parse(toolCall.function.arguments);
+      const toolResponse = getOrderStatus(rawArgument.orderId);
+      // to avoid error
       context.push(response.choices[0].message);
       context.push({
         role: "tool",
